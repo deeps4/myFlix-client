@@ -1,8 +1,37 @@
+import { useParams } from "react-router";
+import { Link } from "react-router-dom";
+import { useState } from "react";
 import "./movie-view.scss";
 
-import PropTypes from "prop-types";
+import useUserInfo from "../../hooks/useUserInfo";
+import { useEffect } from "react";
 
-export const MovieView = ({ movie, onBackClick }) => {
+export const MovieView = () => {
+  const { movieId } = useParams();
+  const userInfo = useUserInfo();
+  console.log(userInfo);
+  const [movie, setMovie] = useState(null);
+
+  useEffect(() => {
+    if (userInfo.token) {
+      fetch(
+        `https://my-movies-flix-05-b51bd5948ca6.herokuapp.com/movies/${movieId}`,
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
+      )
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          setMovie(data);
+        });
+    }
+  }, [userInfo.token]);
+
+  if (!movie) {
+    return null;
+  }
   return (
     <div>
       <div>
@@ -24,27 +53,7 @@ export const MovieView = ({ movie, onBackClick }) => {
         <span>Director: </span>
         <span>{movie.Director.Name}</span>
       </div>
-      <button
-        onClick={onBackClick}
-        className="back-button"
-        style={{ cursor: "pointer" }}
-      >
-        Back
-      </button>
+      <Link to={"/"}>Back</Link>
     </div>
   );
-};
-MovieView.propTypes = {
-  movie: PropTypes.shape({
-    ImagePath: PropTypes.string.isRequired,
-    Title: PropTypes.string.isRequired,
-    Description: PropTypes.string.isRequired,
-    Genre: PropTypes.shape({
-      Name: PropTypes.string.isRequired,
-    }),
-    Director: PropTypes.shape({
-      Name: PropTypes.string.isRequired,
-    }),
-  }).isRequired,
-  onBackClick: PropTypes.func.isRequired,
 };
