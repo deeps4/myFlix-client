@@ -7,6 +7,8 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useUserInfo from "../../hooks/useUserInfo";
+import { NavigationBar } from "../navigation-bar/navigation-bar";
+import { number } from "prop-types";
 
 export const MainView = () => {
   const [movies, updateMovies] = useState([]);
@@ -37,17 +39,8 @@ export const MainView = () => {
   };
   const onLogout = () => {
     setUser(null);
-    localStorage.removeItem("user");
-  };
-
-  const renderLoginAndSignup = () => {
-    return (
-      <div>
-        <LoginView onLoginSuccess={onLoginSuccess} />
-        or
-        <SignupView />
-      </div>
-    );
+    setToken(null);
+    localStorage.clear();
   };
 
   const renderMovieView = () => {
@@ -59,13 +52,7 @@ export const MainView = () => {
         {movies.map((movie) => {
           return (
             <Col key={movie._id} md={3} className="mb-5">
-              <MovieDetails
-                movie={movie}
-
-                // onMovieClick={(newSelectedMovie) => {
-                //   updateSelectedMovie(newSelectedMovie);
-                // }}
-              />
+              <MovieDetails movie={movie} />
             </Col>
           );
         })}
@@ -75,60 +62,63 @@ export const MainView = () => {
   };
 
   return (
-    <BrowserRouter>
-      <Row className="justify-content-md-center">
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              user ? (
-                <Navigate to="/" />
-              ) : (
-                <Col md={5}>
-                  <LoginView onLoginSuccess={onLoginSuccess} />
-                </Col>
-              )
-            }
-          />
-          <Route
-            path="/signup"
-            element={
-              user ? (
-                <Navigate to="/" />
-              ) : (
-                <Col md={5}>
-                  <SignupView />
-                </Col>
-              )
-            }
-          />
+    <>
+      <BrowserRouter>
+        <Row className="justify-content-md-center">
+          <NavigationBar onLoggedOut={onLogout} />
+          <Routes>
+            <Route
+              path="/login"
+              element={
+                user ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Col md={5}>
+                    <LoginView onLoginSuccess={onLoginSuccess} />
+                  </Col>
+                )
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                user ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Col md={5}>
+                    <SignupView />
+                  </Col>
+                )
+              }
+            />
 
-          <Route
-            path="/"
-            element={
-              !user ? (
-                <Navigate to="/login" />
-              ) : loading ? (
-                "LOADING..."
-              ) : (
-                renderMovieList()
-              )
-            }
-          />
-          <Route
-            path="/movie/:movieId"
-            element={
-              !user ? (
-                <Navigate to="login" />
-              ) : (
-                <Col md={8} style={{ border: "1px solid black" }}>
-                  {renderMovieView()}
-                </Col>
-              )
-            }
-          />
-        </Routes>
-      </Row>
-    </BrowserRouter>
+            <Route
+              path="/"
+              element={
+                !user ? (
+                  <Navigate to="/login" />
+                ) : loading ? (
+                  "LOADING..."
+                ) : (
+                  renderMovieList()
+                )
+              }
+            />
+            <Route
+              path="/movie/:movieId"
+              element={
+                !user ? (
+                  <Navigate to="login" />
+                ) : (
+                  <Col md={8} style={{ border: "1px solid black" }}>
+                    {renderMovieView()}
+                  </Col>
+                )
+              }
+            />
+          </Routes>
+        </Row>
+      </BrowserRouter>
+    </>
   );
 };
