@@ -1,33 +1,47 @@
-import { Navbar, Container, Nav } from "react-bootstrap";
+import PropTypes from "prop-types";
+import { Navbar, Container, NavDropdown, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import useUserInfo from "../../hooks/useUserInfo";
 
-export const NavigationBar = ({ onLoggedOut }) => {
-  const userInfo = useUserInfo();
-
+export const NavigationBar = ({ onLoggedOut, userInfo }) => {
   return (
-    <Navbar bg="primary" expand="lg">
+    <Navbar bg="primary" expand="lg" className="bg-body-tertiary">
       <Container>
         <Navbar.Brand as={Link} to="/">
           Movies App
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
-          <Nav>
+        <Nav className="me-auto">
+          <NavDropdown id="basic-nav-dropdown">
             {userInfo.user ? (
               <>
-                <Nav.Link href="/">Home</Nav.Link>
-                <Nav.Link onClick={onLoggedOut}>Logout</Nav.Link>
+                <NavDropdown.Item>{userInfo.user.Username}</NavDropdown.Item>
+                <NavDropdown.Item href="/">Home</NavDropdown.Item>
+                <NavDropdown.Item href="/profile">Settings</NavDropdown.Item>
+                <NavDropdown.Item onClick={onLoggedOut}>
+                  Logout
+                </NavDropdown.Item>
               </>
             ) : (
               <>
-                <Nav.Link href="/login">Login</Nav.Link>
-                <Nav.Link href="/signup">Signup</Nav.Link>
+                <NavDropdown.Item href="/login">Login</NavDropdown.Item>
+                <NavDropdown.Item href="/signup">Signup</NavDropdown.Item>
               </>
             )}
-          </Nav>
-        </Navbar.Collapse>
+          </NavDropdown>
+        </Nav>
       </Container>
     </Navbar>
   );
+};
+NavigationBar.PropTypes = {
+  userInfo: PropTypes.shape({
+    user: PropTypes.shape({
+      Username: PropTypes.string.isRequired,
+      Password: PropTypes.string.isRequired,
+      Email: PropTypes.string.isRequired,
+      Birthday: PropTypes.string.isRequired,
+      FavouriteMovies: PropTypes.array,
+    }),
+    token: PropTypes.string.isRequired,
+  }).isRequired,
+  onLoggedOut: PropTypes.func.isRequired,
 };

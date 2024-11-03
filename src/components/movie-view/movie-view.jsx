@@ -2,14 +2,11 @@ import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import "./movie-view.scss";
-
-import useUserInfo from "../../hooks/useUserInfo";
 import { useEffect } from "react";
+import PropTypes from "prop-types";
 
-export const MovieView = () => {
+export const MovieView = ({ userInfo }) => {
   const { movieId } = useParams();
-  const userInfo = useUserInfo();
-  console.log(userInfo);
   const [movie, setMovie] = useState(null);
 
   useEffect(() => {
@@ -32,10 +29,12 @@ export const MovieView = () => {
   if (!movie) {
     return null;
   }
+  console.log(userInfo.user, "-------");
+
   return (
     <div>
-      <div>
-        <img src={movie.ImagePath} className="w-100" />
+      <div className="d-flex flex-column align-items-center my-4">
+        <img src={movie.ImagePath} className="w-25 m-3" />
       </div>
       <div>
         <span>Title: </span>
@@ -56,4 +55,17 @@ export const MovieView = () => {
       <Link to={"/"}>Back</Link>
     </div>
   );
+};
+
+MovieView.propTypes = {
+  userInfo: PropTypes.shape({
+    user: PropTypes.shape({
+      Username: PropTypes.string.isRequired,
+      Password: PropTypes.string.isRequired,
+      Email: PropTypes.string.isRequired,
+      Birthday: PropTypes.string.isRequired,
+      FavouriteMovies: PropTypes.array,
+    }),
+    token: PropTypes.string.isRequired,
+  }).isRequired,
 };

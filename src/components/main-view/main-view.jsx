@@ -9,14 +9,14 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useUserInfo from "../../hooks/useUserInfo";
 import { NavigationBar } from "../navigation-bar/navigation-bar";
 import { number } from "prop-types";
+import { ProfileView } from "../profile-view/profile-view";
 
 export const MainView = () => {
   const [movies, updateMovies] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const userInfo = useUserInfo();
-  const [user, setUser] = useState(userInfo.user);
-  const [token, setToken] = useState(userInfo.token);
+  const { user, token } = userInfo;
 
   useEffect(() => {
     if (token) {
@@ -34,17 +34,18 @@ export const MainView = () => {
   }, [token]);
 
   const onLoginSuccess = (userData, userToken) => {
-    setUser(userData);
-    setToken(userToken);
+    userInfo.updateUser(userData);
+    userInfo.updateToken(userToken);
   };
   const onLogout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.clear();
+    userInfo.updateToken(null);
+    userInfo.updateUser(null);
   };
 
   const renderMovieView = () => {
-    return <MovieView style={{ border: "1px solid green" }} />;
+    return (
+      <MovieView style={{ border: "1px solid green" }} userInfo={userInfo} />
+    );
   };
   const renderMovieList = () => {
     return (
@@ -52,7 +53,7 @@ export const MainView = () => {
         {movies.map((movie) => {
           return (
             <Col key={movie._id} md={3} className="mb-5">
-              <MovieDetails movie={movie} />
+              <MovieDetails movie={movie} userInfo={userInfo} />
             </Col>
           );
         })}
@@ -65,7 +66,7 @@ export const MainView = () => {
     <>
       <BrowserRouter>
         <Row className="justify-content-md-center">
-          <NavigationBar onLoggedOut={onLogout} />
+          <NavigationBar onLoggedOut={onLogout} userInfo={userInfo} />
           <Routes>
             <Route
               path="/login"
@@ -113,6 +114,21 @@ export const MainView = () => {
                   <Col md={8} style={{ border: "1px solid black" }}>
                     {renderMovieView()}
                   </Col>
+                )
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                !user ? (
+                  <Navigate to="/login" />
+                ) : (
+                  <ProfileView
+                    movies={movies}
+                    onDeregisterSuccess={onLogout}
+                    userInfo={userInfo}
+                  />
                 )
               }
             />
