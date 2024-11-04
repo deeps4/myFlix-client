@@ -13,7 +13,6 @@ export const NavigationBar = ({ onLoggedOut, userInfo }) => {
           <NavDropdown id="basic-nav-dropdown">
             {userInfo.user ? (
               <>
-                <NavDropdown.Item>{userInfo.user.Username}</NavDropdown.Item>
                 <NavDropdown.Item href="/">Home</NavDropdown.Item>
                 <NavDropdown.Item href="/profile">Settings</NavDropdown.Item>
                 <NavDropdown.Item onClick={onLoggedOut}>

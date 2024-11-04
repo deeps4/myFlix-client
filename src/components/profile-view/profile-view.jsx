@@ -1,6 +1,7 @@
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import { MovieDetails } from "../movie-details/movie-details";
 
 export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
   const [user, setUser] = useState({ ...userInfo.user });
@@ -17,7 +18,7 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
     };
 
     fetch(
-      `https://my-movies-flix-05-b51bd5948ca6.herokuapp.com/users/${user.Username}`,
+      `https://my-movies-flix-05-b51bd5948ca6.herokuapp.com/users/${userInfo.user.Username}`,
       {
         method: "PUT",
         body: JSON.stringify(data),
@@ -37,7 +38,7 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
       })
       .then((data) => {
         if (data) {
-          localStorage.setItem("user", JSON.stringify(data));
+          userInfo.updateUser(data);
         }
       });
   };
@@ -52,23 +53,33 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
   };
 
   const getFavoriteMovies = () => {
-    return movies.filter((m) => user.FavouriteMovies.includes(m._id));
+    return movies.filter((m) => userInfo.user.FavouriteMovies.includes(m._id));
   };
 
-  const renderFavouriteMovieOptions = () => {
-    return getFavoriteMovies().map((favMovie) => {
+  // const renderFavouriteMovieOptions = () => {
+  //   return getFavoriteMovies().map((favMovie) => {
+  //     return (
+  //       <div className="my-2" key={favMovie._id}>
+  //         {favMovie.Title}
+  //         <Button
+  //           onClick={removeFavouriteMovie(favMovie._id)}
+  //           className="ms-2"
+  //           variant="outline-danger"
+  //           size="sm"
+  //         >
+  //           Delete
+  //         </Button>
+  //       </div>
+  //     );
+  //   });
+  // };
+
+  const renderMovieList = () => {
+    return getFavoriteMovies().map((movie) => {
       return (
-        <div className="my-2" key={favMovie._id}>
-          {favMovie.Title}
-          <Button
-            onClick={removeFavouriteMovie(favMovie._id)}
-            className="ms-2"
-            variant="outline-danger"
-            size="sm"
-          >
-            Delete
-          </Button>
-        </div>
+        <Col key={movie._id} md={6} className="mb-5">
+          <MovieDetails movie={movie} userInfo={userInfo} />
+        </Col>
       );
     });
   };
@@ -142,17 +153,18 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
           />
         </Form.Group>
 
-        {/* <Form.Group>
-        <Form.Label>Favourite Movie:</Form.Label>
-        {renderFavouriteMovieOptions()}
-      </Form.Group> */}
-
         <Button className="me-4 my-4" type="submit">
           Save Changes
         </Button>
         <Button onClick={handleDeregisterUser} variant="danger">
           Deregister
         </Button>
+      </Form>
+      <Form>
+        <Form.Group>
+          <Form.Label>Favourite Movie:</Form.Label>
+          <Row>{renderMovieList()}</Row>
+        </Form.Group>
       </Form>
     </Col>
   );
