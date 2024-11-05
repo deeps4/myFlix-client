@@ -5,16 +5,18 @@ import { LoginView } from "../login-view/login-view";
 import { SignupView } from "../signup-view/signup-view";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import useUserInfo from "../../hooks/useUserInfo";
+import { NavigationBar } from "../navigation-bar/navigation-bar";
+import { number } from "prop-types";
+import { ProfileView } from "../profile-view/profile-view";
 
 export const MainView = () => {
-  const userFromStorage = JSON.parse(localStorage.getItem("user"));
-  const tokenFromStorage = localStorage.getItem("token");
   const [movies, updateMovies] = useState([]);
 
-  const [selectedMovie, updateSelectedMovie] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(userFromStorage);
-  const [token, setToken] = useState(tokenFromStorage);
+  const userInfo = useUserInfo();
+  const { user, token } = userInfo;
 
   useEffect(() => {
     if (token) {
@@ -32,33 +34,17 @@ export const MainView = () => {
   }, [token]);
 
   const onLoginSuccess = (userData, userToken) => {
-    setUser(userData);
-    setToken(userToken);
+    userInfo.updateUser(userData);
+    userInfo.updateToken(userToken);
   };
   const onLogout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
-
-  const renderLoginAndSignup = () => {
-    return (
-      <div>
-        <LoginView onLoginSuccess={onLoginSuccess} />
-        or
-        <SignupView />
-      </div>
-    );
+    userInfo.updateToken(null);
+    userInfo.updateUser(null);
   };
 
   const renderMovieView = () => {
     return (
-      <MovieView
-        movie={selectedMovie}
-        style={{ border: "1px solid green" }}
-        onBackClick={() => {
-          updateSelectedMovie(null);
-        }}
-      />
+      <MovieView style={{ border: "1px solid green" }} userInfo={userInfo} />
     );
   };
   const renderMovieList = () => {
@@ -67,12 +53,7 @@ export const MainView = () => {
         {movies.map((movie) => {
           return (
             <Col key={movie._id} md={3} className="mb-5">
-              <MovieDetails
-                movie={movie}
-                onMovieClick={(newSelectedMovie) => {
-                  updateSelectedMovie(newSelectedMovie);
-                }}
-              />
+              <MovieDetails movie={movie} userInfo={userInfo} />
             </Col>
           );
         })}
@@ -82,20 +63,78 @@ export const MainView = () => {
   };
 
   return (
-    <Row className="justify-content-md-center">
-      {!user ? (
-        <Col md={5}>{renderLoginAndSignup()}</Col>
-      ) : loading ? (
-        <div>LOADING...</div>
-      ) : selectedMovie ? (
-        <Col md={8} style={{ border: "1px solid black" }}>
-          {renderMovieView()}
-        </Col>
-      ) : movies.length === 0 ? (
-        <div>Movie list is empty.</div>
-      ) : (
-        renderMovieList()
-      )}
-    </Row>
+    <>
+      <BrowserRouter>
+        <Row className="justify-content-md-center">
+          <NavigationBar onLoggedOut={onLogout} userInfo={userInfo} />
+          <Routes>
+            <Route
+              path="/login"
+              element={
+                user ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Col md={5}>
+                    <LoginView onLoginSuccess={onLoginSuccess} />
+                  </Col>
+                )
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                user ? (
+                  <Navigate to="/" />
+                ) : (
+                  <Col md={5}>
+                    <SignupView />
+                  </Col>
+                )
+              }
+            />
+
+            <Route
+              path="/"
+              element={
+                !user ? (
+                  <Navigate to="/login" />
+                ) : loading ? (
+                  "LOADING..."
+                ) : (
+                  renderMovieList()
+                )
+              }
+            />
+            <Route
+              path="/movie/:movieId"
+              element={
+                !user ? (
+                  <Navigate to="login" />
+                ) : (
+                  <Col md={8} style={{ border: "1px solid black" }}>
+                    {renderMovieView()}
+                  </Col>
+                )
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                !user ? (
+                  <Navigate to="/login" />
+                ) : (
+                  <ProfileView
+                    movies={movies}
+                    onDeregisterSuccess={onLogout}
+                    userInfo={userInfo}
+                  />
+                )
+              }
+            />
+          </Routes>
+        </Row>
+      </BrowserRouter>
+    </>
   );
 };
