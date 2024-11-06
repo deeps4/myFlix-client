@@ -8,12 +8,11 @@ import Col from "react-bootstrap/Col";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import useUserInfo from "../../hooks/useUserInfo";
 import { NavigationBar } from "../navigation-bar/navigation-bar";
-import { number } from "prop-types";
 import { ProfileView } from "../profile-view/profile-view";
 
 export const MainView = () => {
   const [movies, updateMovies] = useState([]);
-
+  const [filteredMovies, setFilteredMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const userInfo = useUserInfo();
   const { user, token } = userInfo;
@@ -28,6 +27,7 @@ export const MainView = () => {
         })
         .then((data) => {
           updateMovies(data);
+          setFilteredMovies(data);
           setLoading(false);
         });
     }
@@ -50,7 +50,7 @@ export const MainView = () => {
   const renderMovieList = () => {
     return (
       <>
-        {movies.map((movie) => {
+        {filteredMovies.map((movie) => {
           return (
             <Col key={movie._id} md={3} className="mb-5">
               <MovieDetails movie={movie} userInfo={userInfo} />
@@ -62,11 +62,22 @@ export const MainView = () => {
     );
   };
 
+  const findMovies = (keyword) => {
+    const searchedMovies = movies.filter((movie) => {
+      return movie.Title.toLowerCase().includes(keyword.toLowerCase());
+    });
+    setFilteredMovies(searchedMovies);
+  };
+
   return (
     <>
       <BrowserRouter>
         <Row className="justify-content-md-center">
-          <NavigationBar onLoggedOut={onLogout} userInfo={userInfo} />
+          <NavigationBar
+            onLoggedOut={onLogout}
+            userInfo={userInfo}
+            findMovies={findMovies}
+          />
           <Routes>
             <Route
               path="/login"
