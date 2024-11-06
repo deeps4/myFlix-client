@@ -56,24 +56,6 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
     return movies.filter((m) => userInfo.user.FavouriteMovies.includes(m._id));
   };
 
-  // const renderFavouriteMovieOptions = () => {
-  //   return getFavoriteMovies().map((favMovie) => {
-  //     return (
-  //       <div className="my-2" key={favMovie._id}>
-  //         {favMovie.Title}
-  //         <Button
-  //           onClick={removeFavouriteMovie(favMovie._id)}
-  //           className="ms-2"
-  //           variant="outline-danger"
-  //           size="sm"
-  //         >
-  //           Delete
-  //         </Button>
-  //       </div>
-  //     );
-  //   });
-  // };
-
   const renderMovieList = () => {
     return getFavoriteMovies().map((movie) => {
       return (
@@ -170,13 +152,14 @@ export const ProfileView = ({ movies, onDeregisterSuccess, userInfo }) => {
   );
 };
 ProfileView.propTypes = {
-  movie: PropTypes.shape({
-    Title: PropTypes.string.isRequired,
-  }).isRequired,
+  movies: PropTypes.arrayOf(
+    PropTypes.shape({
+      Title: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   userInfo: PropTypes.shape({
     user: PropTypes.shape({
       Username: PropTypes.string.isRequired,
-      Password: PropTypes.string.isRequired,
       Email: PropTypes.string.isRequired,
       Birthday: PropTypes.string.isRequired,
       FavouriteMovies: PropTypes.array,
